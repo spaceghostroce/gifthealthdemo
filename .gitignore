@@ -1,0 +1,22 @@
+# Ignore Bundler config and locally installed gems.
+/.bundle
+/vendor/bundle
+
+# Ignore the SQLite database files and logs. Never commit a real database.
+/db/*.sqlite3
+/db/*.sqlite3-*
+/log/*
+/tmp/*
+!/log/.keep
+!/tmp/.keep
+/tmp/pids/*
+!/tmp/pids/.keep
+/storage/*
+!/storage/.keep
+
+# Ignore Rails' encrypted master key. (We plant a fake secret elsewhere on purpose.)
+/config/master.key
+
+# Editor/OS noise
+.DS_Store
+*.swp

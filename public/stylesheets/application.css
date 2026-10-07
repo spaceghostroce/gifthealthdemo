@@ -1,0 +1,7 @@
+/* Minimal styling so the demo is readable. Nothing security-relevant here. */
+body { font-family: system-ui, sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; color: #222; }
+h1 { border-bottom: 2px solid #2a7f62; padding-bottom: .25rem; }
+a { color: #2a7f62; }
+input[type=text] { padding: .4rem; }
+input[type=submit], button { padding: .4rem .8rem; background: #2a7f62; color: #fff; border: 0; border-radius: 4px; cursor: pointer; }
+div[id^=patient_], div[id^=prescription_] { border: 1px solid #ddd; border-radius: 6px; padding: .5rem 1rem; margin: .5rem 0; }

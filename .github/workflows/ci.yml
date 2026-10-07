@@ -1,0 +1,35 @@
+# Baseline pipeline: install Ruby + gems, set up the test database, run the tests.
+# Security scanners get added as separate workflow files in later steps.
+name: CI
+
+# When to run: on every pull request, and on every push to main.
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Download the repo's code onto the runner.
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      # Install the Ruby version from .ruby-version, run `bundle install`,
+      # and cache the gems so the next run is faster.
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      # Create the SQLite test database and apply the schema.
+      - name: Prepare database
+        run: bin/rails db:prepare
+        env:
+          RAILS_ENV: test
+
+      # Run the unit and controller tests.
+      - name: Run tests
+        run: bin/rails test

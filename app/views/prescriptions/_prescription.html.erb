@@ -1,0 +1,26 @@
+<div id="<%= dom_id prescription %>">
+  <p>
+    <strong>Patient:</strong>
+    <%= link_to prescription.patient.name, prescription.patient %>
+  </p>
+
+  <p>
+    <strong>Drug name:</strong>
+    <%= prescription.drug_name %>
+  </p>
+
+  <p>
+    <strong>Dosage:</strong>
+    <%= prescription.dosage %>
+  </p>
+
+  <p>
+    <strong>Notes:</strong>
+    <%# VULN: cross-site scripting (XSS).
+        Rails escapes HTML by default, which is what makes <%= %> safe.
+        `raw` turns that protection off, so if someone saves
+        <script>alert(1)</script> in the notes, every viewer's browser runs it.
+        Safe version:  <%= prescription.notes %>  (no raw) %>
+    <%= raw prescription.notes %>
+  </p>
+</div>
