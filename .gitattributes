@@ -1,0 +1,12 @@
+# Line-ending policy for this repo.
+# Ross edits from Windows (PowerShell) and Claude from WSL (Linux). Without this
+# file, Windows git converts files to CRLF on checkout and Linux git then sees
+# every file as modified. "eol=lf" forces Unix line endings in the working tree
+# on both sides, which Ruby scripts and shell tools expect anyway.
+* text=auto eol=lf
+
+# Binary files: never touch their bytes.
+*.png binary
+*.jpg binary
+*.ico binary
+*.sqlite3 binary
