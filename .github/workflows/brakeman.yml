@@ -1,0 +1,50 @@
+# Step 3 (part 1): Brakeman, a static analysis scanner built only for Rails.
+#
+# "Static" means it reads the source code without running the app. Because it
+# knows Rails conventions (controllers, params, ERB views, ActiveRecord), it
+# finds Rails-specific bugs like SQL injection via string interpolation, XSS via
+# `raw`, and mass assignment via `permit!`.
+#
+# Report mode for now: the job stays green even when warnings are found. We
+# flip it to a blocking gate in step 5, once we've triaged the first results.
+name: Brakeman
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  brakeman:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      # Needed to upload results to the repo's Security tab (Code scanning).
+      security-events: write
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      - name: Run Brakeman
+        # -o twice: a plain-text report for the log and a SARIF file for GitHub.
+        # SARIF is the standard JSON format every code scanner speaks, so GitHub
+        # can show Brakeman and CodeQL findings side by side.
+        # --no-exit-on-warn: report, don't fail (until step 5).
+        run: bundle exec brakeman --no-pager --no-exit-on-warn -o brakeman.txt -o brakeman.sarif
+
+      - name: Show the report in the log
+        run: cat brakeman.txt
+
+      - name: Upload results to GitHub Code scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: brakeman.sarif
+          # A label so GitHub keeps these alerts separate from CodeQL's.
+          category: brakeman

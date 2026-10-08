@@ -1,0 +1,49 @@
+# Step 3 (part 2): CodeQL, GitHub's own static analysis engine.
+#
+# CodeQL builds a database of the code (every variable, call, and data flow)
+# and runs queries against it. The security queries trace "taint": does data
+# from a user (a URL parameter, a form field) reach a dangerous sink (a SQL
+# string, an HTML output) without being cleaned up on the way?
+#
+# It is language-aware but not framework-specific like Brakeman. The two tools
+# overlap on the big items and each catches things the other misses.
+name: CodeQL
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+  # Also run weekly. CodeQL's query packs get new checks over time, so
+  # unchanged code can gain new findings.
+  schedule:
+    - cron: "30 6 * * 1"   # Mondays 06:30 UTC
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    # Run once per language. "actions" scans our workflow .yml files themselves
+    # for pipeline weaknesses (unpinned actions, injectable expressions).
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ ruby, actions ]
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
