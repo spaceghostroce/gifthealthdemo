@@ -27,6 +27,10 @@ gem "tzinfo-data", platforms: %i[ windows jruby ]
 group :development, :test do
   # Interactive debugger.
   gem "debug", platforms: %i[ mri windows ]
+
+  # Brakeman: static security scanner built specifically for Rails (step 3).
+  # require: false means it is a command-line tool, not loaded into the app.
+  gem "brakeman", require: false
 end
 
 group :test do
