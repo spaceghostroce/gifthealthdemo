@@ -43,7 +43,7 @@ jobs:
         run: cat brakeman.txt
 
       - name: Upload results to GitHub Code scanning
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: brakeman.sarif
           # A label so GitHub keeps these alerts separate from CodeQL's.

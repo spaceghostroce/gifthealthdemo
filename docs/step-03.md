@@ -66,6 +66,32 @@ block and flip the switch.
 Gitleaks (step 2) is the exception: a leaked secret is always a stop-the-line
 event, so it has been a gate from day one.
 
-## CodeQL results
+## CodeQL results: zero on the PR, and why that's not a bug
 
-_Filled in after the first run. See the PR._
+On PR #3, CodeQL reported **0 results** for Ruby while Brakeman reported 5. The
+job log shows why: `Successfully created diff range extension pack`. On a pull
+request, CodeQL runs in **diff-informed** mode and only reports alerts located
+in lines the PR changed. Our planted flaws live in files this PR didn't touch,
+so they were filtered out. The idea is to keep PR reviews focused on what the
+author introduced rather than drowning them in pre-existing debt.
+
+The full, un-filtered analysis runs on the `push` to `main` after the merge.
+That's the run that populates the Security tab for the default branch.
+
+Two scanners, three different answers to "is this code safe?":
+
+| Scanner | On the PR | Why |
+|---|---|---|
+| Gitleaks | Red, 2 leaks | Scans all history, fails on anything |
+| Brakeman | Green, 5 alerts uploaded | Whole-app scan, but report-only mode |
+| CodeQL | Green, 0 alerts | Whole-app scan, but PR view is filtered to changed lines |
+
+Knowing *why* each tool says what it says is the actual skill. A green check
+is only reassuring if you know what it was and wasn't looking at.
+
+## Housekeeping: pinning action versions
+
+The first run warned that `github/codeql-action@v3` is deprecated in December
+2026. We bumped both the CodeQL workflow and Brakeman's SARIF upload step to
+`@v4`. Workflow actions are dependencies too, with the same upgrade hygiene as
+gems.
