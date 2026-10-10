@@ -95,3 +95,20 @@ The first run warned that `github/codeql-action@v3` is deprecated in December
 2026. We bumped both the CodeQL workflow and Brakeman's SARIF upload step to
 `@v4`. Workflow actions are dependencies too, with the same upgrade hygiene as
 gems.
+
+## Addendum: results on `main` after the merge
+
+The push to `main` ran the full, un-filtered CodeQL analysis. Security tab,
+default filter, 10 open alerts:
+
+| Tool | Finding | Planted flaw |
+|---|---|---|
+| CodeQL | SQL injection (high) | 1 |
+| CodeQL | CSRF protection disabled (high) | 5. **Brakeman missed this one.** |
+| CodeQL | Insecure mass assignment x2 (critical) | 4 |
+| CodeQL | Workflow missing `permissions:` block (medium), `ci.yml` | Not planted. Our step 1 workflow runs with the default broad token. |
+| Brakeman | XSS via `raw` (error) | 2. **CodeQL missed this one.** |
+| Brakeman | SQL injection, mass assignment | 1, 4 |
+| Brakeman | Ruby 3.2 and Rails 7.1 end-of-life | Not planted |
+
+Each tool caught something the other didn't. That is the argument for two.
