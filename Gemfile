@@ -38,5 +38,5 @@ end
 group :test do
   # Rails 7.1's test runner is not compatible with minitest 6 (released Sept 2026).
   # Not a planted flaw, just a version pin so the tests run.
-  gem "minitest", "~> 5.0"
+  gem "minitest", "~> 6.0"
 end
