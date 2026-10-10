@@ -14,7 +14,7 @@ gem "sqlite3", ">= 1.4"
 # VULN: pinned to 6.4.0 on purpose. This version has a known CVE
 # (CVE-2024-21647, HTTP request smuggling) fixed in 6.4.2.
 # bundler-audit and Dependabot should both flag this in a later step.
-gem "puma", "6.4.0"
+gem "puma", "8.0.2"
 
 # Nokogiri: HTML/XML parsing, used by Rails for sanitizing HTML.
 # VULN: pinned to 1.14.0 on purpose. Later 1.14.x releases fixed several
