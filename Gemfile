@@ -19,7 +19,7 @@ gem "puma", "6.4.0"
 # Nokogiri: HTML/XML parsing, used by Rails for sanitizing HTML.
 # VULN: pinned to 1.14.0 on purpose. Later 1.14.x releases fixed several
 # libxml2 CVEs. Another supply-chain finding for the dependency scanners.
-gem "nokogiri", "1.14.0"
+gem "nokogiri", "1.19.4"
 
 # Time zone data for Windows/JRuby; harmless no-op on Linux.
 gem "tzinfo-data", platforms: %i[ windows jruby ]
