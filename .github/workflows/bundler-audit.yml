@@ -1,0 +1,37 @@
+# Step 4: bundler-audit checks Gemfile.lock against the Ruby advisory database.
+# Dependabot covers the same ground from GitHub's side. Running our own check in
+# CI means the result is visible on every PR, next to the other scanners, and
+# doesn't depend on a GitHub feature being turned on.
+name: Dependency Audit
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+  # Also run on a schedule. New CVEs get published against versions you already
+  # have, so a lockfile that was clean yesterday can be vulnerable today.
+  schedule:
+    - cron: "0 7 * * 1-5"   # weekdays 07:00 UTC
+
+jobs:
+  bundler-audit:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      - name: Audit gems against the advisory database
+        # --update pulls the latest advisories before checking.
+        # continue-on-error is GitHub's "report but don't fail" switch: the step
+        # gets a warning badge, the job stays green. Flipped to a gate in step 5.
+        continue-on-error: true
+        run: bundle exec bundler-audit check --update
