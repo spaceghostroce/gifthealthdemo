@@ -31,6 +31,8 @@ group :development, :test do
   # Brakeman: static security scanner built specifically for Rails (step 3).
   # require: false means it is a command-line tool, not loaded into the app.
   gem "brakeman", require: false
+  # bundler-audit: checks Gemfile.lock against the Ruby advisory database (step 4).
+  gem "bundler-audit", require: false
 end
 
 group :test do
