@@ -1,0 +1,25 @@
+# Dependabot version updates: scheduled PRs that bump dependencies.
+# This is separate from Dependabot *alerts*, which are enabled in repo settings.
+version: 2
+
+updates:
+  # Ruby gems, read from Gemfile and Gemfile.lock in the repo root.
+  - package-ecosystem: "bundler"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    # Cap how many update PRs can be open at once so the repo isn't flooded.
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+
+  # The actions used in our workflow files (actions/checkout, ruby/setup-ruby...)
+  # are dependencies too. This keeps them current, like the v3 -> v4 bump we did by hand.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    labels:
+      - "dependencies"
