@@ -15,7 +15,7 @@ jobs:
     steps:
       # Download the repo's code onto the runner.
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # Install the Ruby version from .ruby-version, run `bundle install`,
       # and cache the gems so the next run is faster.
