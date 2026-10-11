@@ -36,8 +36,8 @@ jobs:
         # -o twice: a plain-text report for the log and a SARIF file for GitHub.
         # SARIF is the standard JSON format every code scanner speaks, so GitHub
         # can show Brakeman and CodeQL findings side by side.
-        # --no-exit-on-warn: report, don't fail (until step 5).
-        run: bundle exec brakeman --no-pager --no-exit-on-warn -o brakeman.txt -o brakeman.sarif
+        # now fails on warnings.
+        run: bundle exec brakeman --no-pager -w2 -o brakeman.txt -o brakeman.sarif
 
       - name: Show the report in the log
         run: cat brakeman.txt
