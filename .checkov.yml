@@ -1,0 +1,40 @@
+# Checkov policy for this repo. The workflow handles mechanics (which files,
+# which output); this file holds the security decisions. Three buckets:
+#
+#   hard-fail-on : the job goes red. A failure here means PHI is exposed or the
+#                  host is trivially compromised.
+#   (everything else) : reported in the log and Security tab, doesn't block.
+#                  Real hardening work, tracked as backlog.
+#   skip-check   : not run. Each one needs a reason, same rule as brakeman.ignore.
+
+soft-fail: true
+
+hard-fail-on:
+  - CKV_AWS_20     # S3 bucket ACL allows public READ (prescription PDFs = PHI)
+  - CKV2_AWS_6     # S3 bucket has no Public Access Block
+  - CKV_AWS_17     # RDS instance is publicly accessible (patient DB)
+  - CKV_AWS_16     # RDS storage not encrypted at rest (HIPAA 164.312(a)(2)(iv))
+  - CKV_AWS_24     # Security group allows SSH from 0.0.0.0/0
+  - CKV_DOCKER_1   # Container exposes port 22
+  - CKV_DOCKER_3   # No USER instruction, app runs as root in the container
+
+# Report only, for the record: CKV_DOCKER_7 (latest tag), CKV_DOCKER_2
+# (HEALTHCHECK), CKV_AWS_133 (backups), CKV_AWS_293 (deletion protection),
+# CKV_AWS_21 (versioning), CKV_AWS_18 (S3 access logs), CKV_AWS_145 (KMS),
+# CKV_AWS_129 / CKV2_AWS_30 (RDS logging), CKV_AWS_161 (IAM auth),
+# CKV_AWS_226 (minor upgrades), CKV_AWS_23 / CKV_AWS_382 (SG hygiene).
+
+skip-check:
+  # Availability and disaster-recovery features. Cost decisions, not security.
+  - CKV_AWS_157    # RDS Multi-AZ
+  - CKV_AWS_144    # S3 cross-region replication
+  # Operational tooling, not a security control.
+  - CKV2_AWS_62    # S3 event notifications
+  - CKV2_AWS_61    # S3 lifecycle configuration
+  - CKV_AWS_353    # RDS performance insights
+  - CKV_AWS_118    # RDS enhanced monitoring
+  - CKV2_AWS_60    # copy tags to snapshots
+  # Demo artifacts. The security group has no EC2 instance to attach to, and
+  # port 80 open to the internet is what a public web server is.
+  - CKV2_AWS_5     # security group not attached to a resource
+  - CKV_AWS_260    # ingress 0.0.0.0/0 to port 80
