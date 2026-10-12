@@ -12,7 +12,13 @@ updates:
     # Cap how many update PRs can be open at once so the repo isn't flooded.
     open-pull-requests-limit: 5
     labels:
-      - "dependencies"
+    - "dependencies"
+    # minitest 6 is incompatible with Rails 7.1's test runner (CI fails).
+    # Remove this once Rails is upgraded to 7.2+ and let Dependabot re-propose it.
+    ignore:
+      - dependency-name: "minitest"
+        versions: [ ">= 6" ]
+      
 
   # The actions used in our workflow files (actions/checkout, ruby/setup-ruby...)
   # are dependencies too. This keeps them current, like the v3 -> v4 bump we did by hand.

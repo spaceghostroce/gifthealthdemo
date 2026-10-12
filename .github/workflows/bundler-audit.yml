@@ -31,7 +31,6 @@ jobs:
 
       - name: Audit gems against the advisory database
         # --update pulls the latest advisories before checking.
-        # continue-on-error is GitHub's "report but don't fail" switch: the step
-        # gets a warning badge, the job stays green. Flipped to a gate in step 5.
-        continue-on-error: true
+        # No continue-on-error any more: a known CVE in the lockfile fails the job.
+        
         run: bundle exec bundler-audit check --update
