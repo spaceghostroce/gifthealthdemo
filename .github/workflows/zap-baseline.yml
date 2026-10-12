@@ -1,0 +1,80 @@
+# Step 7: OWASP ZAP baseline scan, our first DAST (Dynamic Application Security
+# Testing) tool.
+#
+# Everything before this read files. ZAP talks to the running app over HTTP
+# like a browser would, so it sees what an attacker sees: response headers,
+# cookies, error pages, information leaks. That means this job has to do
+# something no other job does: build the app, start it, and keep it running
+# while ZAP works.
+#
+# "Baseline" means passive only. ZAP spiders the site and inspects every
+# request and response but never sends an attack payload. It is safe to run
+# against anything and finishes in a couple of minutes. The active scan that
+# actually attacks forms (SQL injection, XSS) is a separate, slower action.
+#
+# Report mode: fail_action is false, so the job stays green and the findings
+# land in the run summary and a downloadable report.
+name: DAST (ZAP Baseline)
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  zap-baseline:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v7
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      # Same as the CI job: create the SQLite database, load the schema, and
+      # seed it. The seeds matter here because ZAP needs pages with real
+      # content to inspect (including Bob's prescription note with HTML in it).
+      - name: Prepare the database
+        run: bin/rails db:prepare
+
+      # -d daemonizes the server so this step can finish while Puma keeps
+      # running in the background. The loop then polls Rails' built-in health
+      # endpoint (/up) until the app answers, or gives up after 30 seconds.
+      - name: Start the app and wait for it to answer
+        run: |
+          bin/rails server -p 3000 -d
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3000/up > /dev/null; then
+              echo "App is up after ${i}s"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "App did not start in 30s"
+          exit 1
+
+      # The action runs ZAP in a Docker container with host networking, so
+      # "localhost" inside the container is the runner itself.
+      - name: Run the ZAP baseline scan
+        uses: zaproxy/action-baseline@v0.15.0
+        with:
+          target: "http://localhost:3000"
+          # Report mode: findings don't fail the job (yet).
+          fail_action: false
+          # By default the action opens a GitHub issue per run with the
+          # findings. The run summary and artifact are enough; keep issues
+          # for things a human decided to track.
+          allow_issue_writing: false
+          artifact_name: zap-baseline-report
+
+      # ZAP writes a Markdown report into the workspace. Appending it to the
+      # step summary puts the findings on the run page itself, no download.
+      - name: Show the report on the run summary page
+        if: always()
+        run: cat report_md.md >> "$GITHUB_STEP_SUMMARY"
