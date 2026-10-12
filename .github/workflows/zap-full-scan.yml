@@ -1,0 +1,75 @@
+# Step 7b: OWASP ZAP full scan, the active counterpart to the baseline.
+#
+# The baseline only watched. This one attacks. After spidering the site, ZAP
+# sends real payloads into every parameter and form field it found: SQL
+# injection strings into the search box, script tags into the prescription
+# notes, path traversal into IDs. It then checks the responses for evidence
+# that a payload did something. This is the scan that can find the planted
+# SQL injection and stored XSS from the outside, with no access to the code.
+#
+# Because it attacks, it is slow (minutes to tens of minutes, not seconds)
+# and it changes data: it will create and delete patients while it runs.
+# That is fine against a throwaway database on a CI runner. It is never fine
+# against production. So this does not run on every PR. It runs on a
+# schedule and on demand from the Actions tab.
+#
+# Report mode: fail_action is false. Findings go to the run summary and the
+# report artifact.
+name: DAST (ZAP Active Scan)
+
+on:
+  # The "Run workflow" button in the Actions tab.
+  workflow_dispatch:
+  # Weekly, Sunday 03:00 UTC. New ZAP rules ship often, so a clean app can
+  # pick up a new finding without any code change.
+  schedule:
+    - cron: "0 3 * * 0"
+
+jobs:
+  zap-full-scan:
+    runs-on: ubuntu-latest
+    # Hard cap. An active scan that runs away should be killed, not billed.
+    timeout-minutes: 45
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v7
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      - name: Prepare the database
+        run: bin/rails db:prepare
+
+      - name: Start the app and wait for it to answer
+        run: |
+          bin/rails server -p 3000 -d
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3000/up > /dev/null; then
+              echo "App is up after ${i}s"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "App did not start in 30s"
+          exit 1
+
+      - name: Run the ZAP full scan
+        uses: zaproxy/action-full-scan@v0.13.0
+        with:
+          target: "http://localhost:3000"
+          fail_action: false
+          allow_issue_writing: false
+          artifact_name: zap-full-scan-report
+          # -m 5: spider for at most 5 minutes. The app has ~30 URLs, so the
+          # spider finishes in seconds; this is a safety cap, not a target.
+          cmd_options: "-m 5"
+
+      - name: Show the report on the run summary page
+        if: always()
+        run: cat report_md.md >> "$GITHUB_STEP_SUMMARY"
