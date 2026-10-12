@@ -40,11 +40,14 @@ jobs:
         run: bundle exec brakeman --no-pager -w2 -o brakeman.txt -o brakeman.sarif
 
       - name: Show the report in the log
+        if: always()  # even if the previous step fails (warnings found)
         run: cat brakeman.txt
 
       - name: Upload results to GitHub Code scanning
+        if: always()  # even if the previous step fails (warnings found)
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: brakeman.sarif
           # A label so GitHub keeps these alerts separate from CodeQL's.
           category: brakeman
+      
