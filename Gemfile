@@ -5,7 +5,7 @@ source "https://rubygems.org"
 ruby "3.2.3"
 
 # The web framework.
-gem "rails", "~> 7.1.6"
+gem "rails", "~> 8.1.4"
 
 # SQLite: a file-based database, perfect for a demo. No server to run.
 gem "sqlite3", ">= 1.4"
