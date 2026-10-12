@@ -1,0 +1,10 @@
+# Gitleaks exceptions. One fingerprint per line: commit:file:rule:line.
+# Rule: a secret in git history is compromised even after the code is fixed.
+# Every entry here must state that the credential was rotated or was never real.
+#
+# Planted demo key PHARMACY_API_KEY, introduced in step 1 commit 2e3a645.
+# Never a real credential (fake value, no provider behind it), so no rotation
+# needed. The code fix (move to ENV) is scheduled for step 8; these entries
+# stay afterwards because the commit remains in history. Owner: Ross.
+2e3a6458f29b5b7851f1af144d8a83fc86b614c7:config/initializers/pharmacy_api.rb:generic-api-key:10
+2e3a6458f29b5b7851f1af144d8a83fc86b614c7:infra/Dockerfile:generic-api-key:14
