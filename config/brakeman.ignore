@@ -1,0 +1,32 @@
+{
+  "ignored_warnings": [
+    {
+      "warning_type": "SQL Injection",
+      "file": "app/controllers/patients_controller.rb",
+      "line": 14,
+      "fingerprint": "8e682d02efe7945a227279443e0ce3f529ae1340ef33219d63bf2516b7ad4c4e",
+      "note": "DEFERRED, not accepted. Planted flaw for the DevSecOps demo (see VULN comment). Must stay until step 7's DAST scan has exercised it. Fix scheduled in step 8. Owner: Ross."
+    },
+    {
+      "warning_type": "Cross-Site Scripting",
+      "file": "app/views/prescriptions/_prescription.html.erb",
+      "line": 24,
+      "fingerprint": "2f84adbfbea2fcaa0eb27c67fdc7b8b2997f9112897820ea1ec135c6d024548e",
+      "note": "DEFERRED, not accepted. Planted flaw for the DevSecOps demo (see VULN comment). Needed for step 7's DAST scan. Fix scheduled in step 8. Owner: Ross."
+    },
+    {
+      "warning_type": "Mass Assignment",
+      "file": "app/controllers/patients_controller.rb",
+      "line": 71,
+      "fingerprint": "4c720d56ba7a42cae1ebaefc136be460150ff87bbe23a85b97f0883e2d85bfa8",
+      "note": "DEFERRED, not accepted. Planted flaw for the DevSecOps demo (see VULN comment). Fix scheduled in step 8. Owner: Ross."
+    },
+    {
+      "warning_type": "Unmaintained Dependency",
+      "file": ".ruby-version",
+      "line": 1,
+      "fingerprint": "edf687f759ec9765bd5db185dbc615c80af77d6e7e19386fc42934e7a80307af",
+      "note": "ACCEPTED RISK, time-boxed. Ruby 3.2 left support 2026-03-31. Dev machine is pinned to Ubuntu 24.04's apt Ruby 3.2.3. Rails 8.1 still runs on it. Revisit by 2026-12-01: install Ruby 3.4 via a version manager and bump .ruby-version. Owner: Ross."
+    }
+  ]
+}

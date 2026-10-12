@@ -36,8 +36,9 @@ jobs:
         # -o twice: a plain-text report for the log and a SARIF file for GitHub.
         # SARIF is the standard JSON format every code scanner speaks, so GitHub
         # can show Brakeman and CodeQL findings side by side.
-        # now fails on warnings.
-        run: bundle exec brakeman --no-pager -w2 -o brakeman.txt -o brakeman.sarif
+        # -w2: only medium and high confidence warnings count. Any warning fails
+        # the job (exit code 3), which is what makes this a gate instead of a report.
+        run: bundle exec brakeman --no-pager -w2 --ensure-ignore-notes -o brakeman.txt -o brakeman.sarif
 
       - name: Show the report in the log
         if: always()  # even if the previous step fails (warnings found)
