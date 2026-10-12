@@ -1,0 +1,69 @@
+# Step 6: Checkov, an Infrastructure-as-Code (IaC) scanner.
+#
+# Brakeman and CodeQL read the app. Checkov reads the files that describe where
+# the app runs: the Dockerfile and the Terraform in infra/. It compares each
+# resource against a library of policies (about 1,000 for AWS alone) and fails
+# the ones that don't match: a database open to the internet, a bucket that is
+# world-readable, a container running as root. Each policy has an ID like
+# CKV_AWS_17 that you can look up.
+#
+# Report mode for now (--soft-fail): findings are printed and uploaded to the
+# Security tab, but the job stays green. It becomes a required check only after
+# we have triaged the first results and written a .checkov.yml policy.
+name: Checkov
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  checkov:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      # Needed to upload results to the repo's Security tab (Code scanning).
+      security-events: write
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v7
+
+      # Checkov is a Python tool, so the runner needs Python, not Ruby.
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Pinned to one version, same reason we pinned Gitleaks: a scanner that
+      # silently upgrades itself can change its verdict without the code changing.
+      - name: Install Checkov
+        run: pip install checkov==3.3.28
+
+      - name: Scan the Dockerfile and Terraform
+        # -f names each file explicitly so the report paths come out relative to
+        #    the repo root, which is what GitHub needs to annotate the right lines.
+        # --framework limits the policy set to the two file types we have.
+        # --skip-download: don't phone home for extra policies; the built-in set is enough.
+        # --soft-fail: report mode. Exit 0 even when checks fail.
+        # -o twice: human-readable table in the log, SARIF file for GitHub.
+        # --output-file-path "console,checkov.sarif": the CLI output goes to the
+        #    log and the SARIF goes to that file.
+        run: >
+          checkov -f infra/Dockerfile -f infra/main.tf
+          --framework dockerfile,terraform
+          --skip-download
+          --soft-fail
+          --compact
+          -o cli -o sarif
+          --output-file-path console,checkov.sarif
+
+      - name: Upload results to GitHub Code scanning
+        # Runs even if the scan step fails, so the findings are never lost.
+        if: always()
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: checkov.sarif
+          # Keeps Checkov's alerts separate from CodeQL's and Brakeman's.
+          category: checkov
