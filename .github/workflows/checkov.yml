@@ -7,9 +7,10 @@
 # world-readable, a container running as root. Each policy has an ID like
 # CKV_AWS_17 that you can look up.
 #
-# Report mode for now (--soft-fail): findings are printed and uploaded to the
-# Security tab, but the job stays green. It becomes a required check only after
-# we have triaged the first results and written a .checkov.yml policy.
+# Policy lives in .checkov.yml at the repo root: which checks fail the job,
+# which are report-only, which are skipped and why. Checkov reads that file
+# automatically. This workflow only handles mechanics: what to scan, where
+# the output goes.
 name: Checkov
 
 on:
@@ -46,7 +47,6 @@ jobs:
         #    the repo root, which is what GitHub needs to annotate the right lines.
         # --framework limits the policy set to the two file types we have.
         # --skip-download: don't phone home for extra policies; the built-in set is enough.
-        # --soft-fail: report mode. Exit 0 even when checks fail.
         # -o twice: human-readable table in the log, SARIF file for GitHub.
         # --output-file-path "console,checkov.sarif": the CLI output goes to the
         #    log and the SARIF goes to that file.
@@ -54,7 +54,6 @@ jobs:
           checkov -f infra/Dockerfile -f infra/main.tf
           --framework dockerfile,terraform
           --skip-download
-          --soft-fail
           --compact
           -o cli -o sarif
           --output-file-path console,checkov.sarif
