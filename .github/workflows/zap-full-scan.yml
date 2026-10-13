@@ -31,6 +31,22 @@ jobs:
     # Hard cap. An active scan that runs away should be killed, not billed.
     timeout-minutes: 45
 
+    # Run the app the way it would ship, not in development mode. The baseline
+    # scan in development mode found Rails' debug error page leaking source
+    # paths and the routes table; production mode serves a plain 404 instead,
+    # and answers about 10x faster, which matters for a scan that sends
+    # thousands of requests.
+    env:
+      RAILS_ENV: production
+      # Production refuses to boot without a secret key base. This value is not
+      # a secret: it signs session cookies on a throwaway runner that is
+      # destroyed when the job ends. A real deployment gets this from a vault.
+      SECRET_KEY_BASE: ci-only-dummy-value-not-a-secret
+      # Production redirects HTTP to HTTPS (force_ssl). ZAP talks plain HTTP to
+      # localhost, so config/environments/production.rb turns that off when
+      # this is set. In a real deployment TLS terminates at the load balancer.
+      DAST_PLAIN_HTTP: "1"
+
     permissions:
       contents: read
 
@@ -67,8 +83,18 @@ jobs:
           allow_issue_writing: false
           artifact_name: zap-full-scan-report
           # -m 5: spider for at most 5 minutes. The app has ~30 URLs, so the
-          # spider finishes in seconds; this is a safety cap, not a target.
-          cmd_options: "-m 5"
+          #    spider finishes in seconds; this is a safety cap, not a target.
+          # -z passes settings to ZAP itself:
+          #    maxScanDurationInMins: stop attacking after 25 minutes and report
+          #      what was found so far. The first run blew through the 45 minute
+          #      job cap with no report at all. A partial report beats none.
+          #    maxRuleDurationInMins: no single rule may hog more than 3 minutes.
+          #    threadPerHost: 5 parallel requests, matching Puma's 5 threads.
+          cmd_options: >-
+            -m 5
+            -z "-config scanner.maxScanDurationInMins=25
+            -config scanner.maxRuleDurationInMins=3
+            -config scanner.threadPerHost=5"
 
       - name: Show the report on the run summary page
         if: always()
