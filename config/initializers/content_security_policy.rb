@@ -1,25 +1,30 @@
-# Be sure to restart your server when you modify this file.
-
-# Define an application-wide content security policy.
-# See the Securing Rails Applications Guide for more information:
-# https://guides.rubyonrails.org/security.html#content-security-policy-header
-
-# Rails.application.configure do
-#   config.content_security_policy do |policy|
-#     policy.default_src :self, :https
-#     policy.font_src    :self, :https, :data
-#     policy.img_src     :self, :https, :data
-#     policy.object_src  :none
-#     policy.script_src  :self, :https
-#     policy.style_src   :self, :https
-#     # Specify URI for violation reports
-#     # policy.report_uri "/csp-violation-report-endpoint"
-#   end
+# Content Security Policy (CSP).
 #
-#   # Generate session nonces for permitted importmap, inline scripts, and inline styles.
-#   config.content_security_policy_nonce_generator = ->(request) { request.session.id.to_s }
-#   config.content_security_policy_nonce_directives = %w(script-src style-src)
+# The browser enforces this header: it only loads scripts, styles, images and
+# so on from the places listed here. Even if an attacker gets HTML into a page
+# (an XSS bug like the one fixed in step 8a), the browser refuses to run a
+# script that isn't from our own origin. CSP is the safety net under output
+# escaping, not a replacement for it.
 #
-#   # Report violations without enforcing the policy.
-#   # config.content_security_policy_report_only = true
-# end
+# This app has no JavaScript and one stylesheet served from /stylesheets, so
+# the policy is strict: everything from our own origin only, no inline styles
+# or scripts, no plugins, and nobody may put us in an iframe.
+#
+# Found by: ZAP baseline + active scan (step 7), "CSP Header Not Set", Medium.
+Rails.application.configure do
+  config.content_security_policy do |policy|
+    policy.default_src :self                # fallback for anything not listed
+    policy.script_src  :self                # no inline <script>, no third parties
+    policy.style_src   :self                # no inline style="", stylesheet only
+    policy.img_src     :self, :data         # :data allows tiny inline icons
+    policy.font_src    :self
+    policy.object_src  :none                # no Flash/Java-style plugins
+    policy.base_uri    :self                # stops <base href> hijacking links
+    policy.form_action :self                # forms may only post back to us
+    policy.frame_ancestors :none            # clickjacking: nobody can frame us
+  end
+
+  # Enforce, don't just report. Flip this to true while rolling CSP out on a
+  # live app: violations go to the browser console instead of being blocked.
+  config.content_security_policy_report_only = false
+end
