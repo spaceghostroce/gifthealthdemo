@@ -5,3 +5,9 @@ a { color: #2a7f62; }
 input[type=text] { padding: .4rem; }
 input[type=submit], button { padding: .4rem .8rem; background: #2a7f62; color: #fff; border: 0; border-radius: 4px; cursor: pointer; }
 div[id^=patient_], div[id^=prescription_] { border: 1px solid #ddd; border-radius: 6px; padding: .5rem 1rem; margin: .5rem 0; }
+
+/* Flash messages and form errors. These used to be inline style="" attributes
+   in the views; the Content Security Policy (step 8b) forbids inline styles,
+   so they live here now. */
+.notice { color: green; }
+.errors { color: red; }

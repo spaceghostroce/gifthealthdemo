@@ -23,6 +23,11 @@ Rails.application.configure do
   # Disable serving static files from `public/`, relying on NGINX/Apache to do so instead.
   # config.public_file_server.enabled = false
 
+  # Files served straight from public/ (the stylesheet, robots.txt) bypass
+  # the Rails stack, so they miss the default security headers. ZAP flagged
+  # X-Content-Type-Options missing on exactly those two files. Add it here.
+  config.public_file_server.headers = { "X-Content-Type-Options" => "nosniff" }
+
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
   # config.asset_host = "http://assets.example.com"
 

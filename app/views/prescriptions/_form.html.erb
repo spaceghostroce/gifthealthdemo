@@ -1,6 +1,6 @@
 <%= form_with(model: prescription) do |form| %>
   <% if prescription.errors.any? %>
-    <div style="color: red">
+    <div class="errors">
       <h2><%= pluralize(prescription.errors.count, "error") %> prohibited this prescription from being saved:</h2>
 
       <ul>
