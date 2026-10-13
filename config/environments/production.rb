@@ -35,7 +35,9 @@ Rails.application.configure do
   # config.assume_ssl = true
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
-  config.force_ssl = true
+  # CI's DAST job scans the app over plain HTTP on localhost, where there is no
+  # TLS, so it sets DAST_PLAIN_HTTP=1 to skip the redirect. Everywhere else: on.
+  config.force_ssl = ENV["DAST_PLAIN_HTTP"].blank?
 
   # Log to STDOUT by default
   config.logger = ActiveSupport::Logger.new(STDOUT)
