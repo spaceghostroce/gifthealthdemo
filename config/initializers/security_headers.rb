@@ -37,8 +37,10 @@ class SecurityHeaders
     "Referrer-Policy"        => "strict-origin-when-cross-origin",
 
     # Fallback CSP for static files and error pages. Controller responses get
-    # the richer policy from content_security_policy.rb instead.
-    "Content-Security-Policy" => "default-src 'self'; object-src 'none'; frame-ancestors 'none'"
+    # the richer policy from content_security_policy.rb instead. base-uri,
+    # form-action and frame-ancestors do NOT inherit from default-src, so
+    # they must be spelled out or ZAP (rightly) reports them as undefined.
+    "Content-Security-Policy" => "default-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
   }.freeze
 
   def initialize(app)
