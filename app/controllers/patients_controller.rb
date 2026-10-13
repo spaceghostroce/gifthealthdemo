@@ -7,11 +7,7 @@ class PatientsController < ApplicationController
   # GET /patients?q=smith   (search by name)
   def index
     if params[:q].present?
-      # VULN: SQL injection.
-      # The search text from the URL is pasted straight into the SQL string.
-      # A visitor can type   ' OR 1=1 --   and rewrite the query, or worse.
-      # Safe version:  Patient.where("name LIKE ?", "%#{params[:q]}%")
-      @patients = Patient.where("name LIKE '%#{params[:q]}%'")
+      @patients = Patient.where("name LIKE ?", "%#{params[:q]}%")
     else
       @patients = Patient.all
     end
@@ -64,10 +60,6 @@ class PatientsController < ApplicationController
 
     # Decide which form fields a browser is allowed to set on a Patient.
     def patient_params
-      # VULN: mass assignment.
-      # permit! accepts EVERY field the browser sends. A user could add
-      # discount_tier=platinum to the form and grant themselves a discount.
-      # Safe version:  .permit(:name, :date_of_birth, :email, :insurance_id)
-      params.require(:patient).permit!
+      params.require(:patient).permit(:name, :date_of_birth, :email, :insurance_id)
     end
 end

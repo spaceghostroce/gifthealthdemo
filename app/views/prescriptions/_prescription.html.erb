@@ -16,11 +16,6 @@
 
   <p>
     <strong>Notes:</strong>
-    <%# VULN: cross-site scripting (XSS).
-        Rails escapes HTML by default, which is what makes <%= %> safe.
-        `raw` turns that protection off, so if someone saves
-        <script>alert(1)</script> in the notes, every viewer's browser runs it.
-        Safe version:  <%= prescription.notes %>  (no raw) %>
-    <%= raw prescription.notes %>
+    <%= prescription.notes %>
   </p>
 </div>

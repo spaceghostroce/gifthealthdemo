@@ -1,10 +1,4 @@
 class PrescriptionsController < ApplicationController
-  # VULN: CSRF protection turned off.
-  # Rails normally requires a hidden token on every form submit so another
-  # website cannot trick a logged-in browser into posting here. This line
-  # removes that check for the whole controller.
-  skip_forgery_protection
-
   before_action :set_prescription, only: %i[ show edit update destroy ]
 
   # GET /prescriptions
