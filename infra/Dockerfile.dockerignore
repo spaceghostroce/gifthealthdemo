@@ -1,0 +1,12 @@
+# Files that must never end up inside the image. Named Dockerfile.dockerignore
+# and kept next to the Dockerfile so Docker (BuildKit) picks it up even though
+# the build context is the repo root.
+.git
+.github
+.env
+.env.*
+log/
+tmp/
+storage/
+node_modules/
+*.sqlite3
